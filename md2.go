@@ -1,9 +1,8 @@
 package md2
 
 const (
-	WORD        = 16
-	TWO_WORDS   = 32
-	BUFFER_SIZE = 48
+	word       = 16
+	bufferSize = 48
 )
 
 var (
@@ -30,8 +29,8 @@ var (
 )
 
 func pad(input []byte) []byte {
-	count := WORD - (len(input) % WORD)
-	padding := make([]byte, count+WORD)
+	count := word - (len(input) % word)
+	padding := make([]byte, count+word)
 	for i := 0; i < count; i++ {
 		padding[i] = byte(count)
 	}
@@ -39,11 +38,11 @@ func pad(input []byte) []byte {
 }
 
 func calcChecksum(input []byte) []byte {
-	checksumIndex := len(input) - WORD
+	checksumIndex := len(input) - word
 	prev := byte(0)
 
-	for i := 0; i < len(input)-WORD; i += WORD {
-		for j := 0; j < WORD; j++ {
+	for i := 0; i < len(input)-word; i += word {
+		for j := 0; j < word; j++ {
 			temp := input[i+j]
 			input[checksumIndex+j] = input[checksumIndex+j] ^ table[temp^prev]
 			prev = input[checksumIndex+j]
@@ -55,18 +54,18 @@ func calcChecksum(input []byte) []byte {
 }
 
 func calcMDBuffer(input []byte) []byte {
-	buffer := make([]byte, BUFFER_SIZE)
+	buffer := make([]byte, bufferSize)
 
-	for i := 0; i < len(input); i += WORD {
-		for j := 0; j < WORD; j++ {
-			buffer[WORD+j] = input[i+j]
-			buffer[TWO_WORDS+j] = buffer[WORD+j] ^ buffer[j]
+	for i := 0; i < len(input); i += word {
+		for j := 0; j < word; j++ {
+			buffer[word+j] = input[i+j]
+			buffer[word*2+j] = buffer[word+j] ^ buffer[j]
 		}
 
 		t := byte(0)
 
 		for j := 0; j < 18; j++ {
-			for k := 0; k < BUFFER_SIZE; k++ {
+			for k := 0; k < bufferSize; k++ {
 				temp := buffer[k] ^ table[t]
 				buffer[k] = temp
 				t = temp
